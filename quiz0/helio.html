@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Angola</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+
+    body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(black, #1a0000);
+    color: white;
+    text-align: center;
+}
+
+.quiz-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+}
+
+h1 {
+    color: gold;
+}
+
+#pergunta {
+    font-size: 20px;
+    margin: 20px 0;
+}
+
+#respostas button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    border: none;
+    background: #222;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#respostas button:hover {
+    background: darkred;
+}
+
+.correto {
+    background: green !important;
+}
+
+.errado {
+    background: red !important;
+}
+
+.tempo-box {
+    margin-bottom: 20px;
+}
+
+.barra {
+    width: 100%;
+    height: 10px;
+    background: #333;
+    margin-top: 5px;
+}
+
+#barraTempo {
+    height: 100%;
+    width: 100%;
+    background: gold;
+    transition: width 1s linear;
+}
+
+#btnProxima {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: gold;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="quiz-container">
+
+    <h1>Quiz Conheça Angola</h1>
+
+    <div class="tempo-box">
+        ⏱️ Tempo: <span id="tempo">30</span>s
+        <div class="barra">
+            <div id="barraTempo"></div>
+        </div>
+    </div>
+
+    <div id="pergunta">Pergunta aqui</div>
+
+    <div id="respostas"></div>
+
+    <button id="btnProxima" onclick="proximaPergunta()" disabled>
+        Próxima →
+    </button>
+
+</div>
+
+<script >
+    const perguntas = [
+    {
+        pergunta: "Qual é a capital de Angola?",
+        respostas: ["Luanda", "Benguela", "Huambo", "Lubango"],
+        correta: 0
+    },
+    {
+        pergunta: "Angola conquistou independência em que ano?",
+        respostas: ["1975", "1961", "1980", "1990"],
+        correta: 0
+    }
+];
+
+let indice = 0;
+let tempo = 30;
+let intervalo;
+let pausado = false;
+
+function carregarPergunta() {
+    let p = perguntas[indice];
+    document.getElementById("pergunta").innerText = p.pergunta;
+
+    let respostasHTML = "";
+    p.respostas.forEach((resposta, i) => {
+        respostasHTML += `<button onclick="responder(${i})">${resposta}</button>`;
+    });
+
+    document.getElementById("respostas").innerHTML = respostasHTML;
+    document.getElementById("btnProxima").disabled = true;
+
+    iniciarTempo();
+}
+
+function iniciarTempo() {
+    pausado = false;
+    tempo = 30;
+
+    intervalo = setInterval(() => {
+        if (!pausado) {
+            tempo--;
+            document.getElementById("tempo").innerText = tempo;
+
+            let porcentagem = (tempo / 30) * 100;
+            document.getElementById("barraTempo").style.width = porcentagem + "%";
+
+            if (tempo <= 0) {
+                clearInterval(intervalo);
+                bloquearRespostas();
+            }
+        }
+    }, 1000);
+}
+
+function responder(i) {
+    pausado = true;
+    clearInterval(intervalo);
+
+    let botoes = document.querySelectorAll("#respostas button");
+    let correta = perguntas[indice].correta;
+
+    botoes.forEach((btn, index) => {
+        if (index === correta) {
+            btn.classList.add("correto");
+        } else if (index === i) {
+            btn.classList.add("errado");
+        }
+        btn.disabled = true;
+    });
+
+    document.getElementById("btnProxima").disabled = false;
+}
+
+function bloquearRespostas() {
+    let botoes = document.querySelectorAll("#respostas button");
+    botoes.forEach(btn => btn.disabled = true);
+
+    document.getElementById("btnProxima").disabled = false;
+}
+
+function proximaPergunta() {
+    clearInterval(intervalo);
+    indice++;
+
+    if (indice < perguntas.length) {
+        carregarPergunta();
+    } else {
+        document.querySelector(".quiz-container").innerHTML =
+            "<h1>Fim do Quiz 🎉</h1>";
+    }
+}
+
+carregarPergunta();
+
+</script>
+</body>
+</html>
